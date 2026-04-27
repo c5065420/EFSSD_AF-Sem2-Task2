@@ -33,4 +33,4 @@ git checkout -b staging
 **A quick tip for the road:**
 If you are working in a team, double-check that the branch wasn't named something slightly different, like `stage` or `feat-staging`. Git is very literal! 
 
-Which of those did the trick for you?
+it worked
