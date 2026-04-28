@@ -1,0 +1,12 @@
+Work-flows:
+git checkout staging 
+git branch
+git pull origin prod
+pwd
+ls
+ls -a
+vim test.xml
+ls -lart
+git add .
+git commit -m "assessment"
+git push origin staging
