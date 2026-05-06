@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- Edit button for the trip organiser -->
+    {% if session.get('user_id') == trip['user'] %}
+        <div class="float-end">
+            <a href="{{ url_for('update', id=trip['id']) }}" class="btn btn-primary mb-3">Edit</a>
+            <form method="post" action="{{ url_for('delete', id=trip['id']) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this trip?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-danger mb-3">Delete</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <h1>{{ trip['match_title'] }}</h1>
+    <p class="text-muted">📅 {{ trip['match_date'] }} · Kick-off {{ trip['kickoff_time'] }}</p>
+    <hr>
+
+    <div class="row">
+
+        <div class="col-md-4 mb-3 text-center">
+            {% if trip['poster'] %}
+                <img src="{{ trip['poster'] }}" alt="Poster for {{ trip['match_title'] }}" class="img-fluid">
+            {% else %}
+                <div class="bg-secondary-subtle p-5 rounded">
+                    <span style="font-size: 5rem;">⚽</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-8">
+
+            <h4>Competition</h4>
+            <p><span class="match-badge">{{ trip['competition'] }}</span></p>
+
+            <h4>Departure</h4>
+            <p>📍 {{ trip['departure_point'] }}<br>
+               🕐 Coach leaves at {{ trip['departure_time'] }}</p>
+
+            <h4>Destination</h4>
+            <p>➡️ {{ trip['destination'] }}</p>
+
+            <h4>Price</h4>
+            <p class="price-display">£{{ "%.2f"|format(trip['price']) }} <small class="text-muted fs-6">/ seat</small></p>
+
+            <h4>Seats</h4>
+            {% set remaining = trip['total_seats'] - seats_booked %}
+            {% set pct = ((seats_booked / trip['total_seats']) * 100) | int if trip['total_seats'] > 0 else 0 %}
+            <p>
+                <strong>{{ remaining }}</strong> of <strong>{{ trip['total_seats'] }}</strong> seats remaining
+            </p>
+            <div class="progress mb-3" style="height: 10px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ pct }}%"></div>
+            </div>
+
+            {% if trip['notes'] %}
+                <h4>Organiser Notes</h4>
+                <p>{{ trip['notes'] }}</p>
+            {% endif %}
+
+            <h4>Organiser</h4>
+            <p>👤 {{ trip['user'] | get_username }}</p>
+
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('trips') }}" class="btn btn-secondary">← Back to All Trips</a>
+    </div>
+
+{% endblock %}

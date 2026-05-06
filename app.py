@@ -126,6 +126,88 @@ def logout():
     flash(category='info', message='You have been logged out.')
     return redirect(url_for('index'))
 
+# Trip Detail Page
+@app.route('/trip/<int:id>/')
+def trip(id):
+    trip_data = get_trip_by_id(id)
+
+    if trip_data:
+        # Get count of seats already booked for this trip
+        seats_booked = get_seats_booked_for_trip(id)
+        return render_template('trip.html', title=trip_data['match_title'], trip=trip_data, seats_booked=seats_booked)
+    else:
+        flash(category='warning', message='Requested trip not found!')
+        return redirect(url_for('trips'))
+
+
+# Edit A Trip Page
+@app.route('/update/<int:id>/', methods=('GET', 'POST'))
+def update(id):
+    trip = get_trip_by_id(id)
+
+    # Check for errors
+    error = None
+    if trip is None:
+        error = 'Trip not found!'
+        flash(category='warning', message=error)
+    elif trip['user'] != session.get('user_id'):
+        error = 'You do not have permission to edit this trip.'
+        flash(category='danger', message=error)
+    if error:
+        return redirect(url_for('trips'))
+
+    if request.method == 'POST':
+        match_title = request.form['match_title']
+        competition = request.form['competition']
+        match_date = request.form['match_date']
+        kickoff_time = request.form['kickoff_time']
+        departure_point = request.form['departure_point']
+        departure_time = request.form['departure_time']
+        destination = request.form['destination']
+        total_seats = int(request.form['total_seats']) if request.form.get('total_seats') else 0
+        price = float(request.form['price']) if request.form.get('price') else 0
+        notes = request.form['notes']
+
+        # Handle poster image upload
+        poster = trip['poster']
+        if 'poster' in request.files:
+            poster_file = request.files['poster']
+            if poster_file and poster_file.filename and poster_file.filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS:
+                poster_url = f"/static/uploads/{poster_file.filename}"
+                poster_file.save(f"{UPLOADS_PATH}{poster_url}")
+                poster = poster_url
+
+        if not match_title:
+            flash(category='danger', message='Match title is required!')
+            return redirect(url_for('update', id=id))
+
+        update_trip(id, match_title, competition, match_date, kickoff_time,
+                    departure_point, departure_time, destination, total_seats,
+                    price, notes, poster)
+
+        flash(category='success', message='Trip updated successfully!')
+        return redirect(url_for('trip', id=id))
+    return render_template('update.html', title="Update Trip", trip=trip)
+
+
+# Delete A Trip
+@app.route('/delete/<int:id>', methods=('POST',))
+def delete(id):
+    trip = get_trip_by_id(id)
+    error = None
+    if trip is None:
+        error = 'Trip not found!'
+        flash(category='warning', message=error)
+    elif trip['user'] != session.get('user_id'):
+        error = 'You do not have permission to delete this trip.'
+        flash(category='danger', message=error)
+    if error:
+        return redirect(url_for('trips'))
+
+    delete_trip(id)
+    flash(category='success', message='Trip deleted successfully!')
+    return redirect(url_for('trips'))
+
 
 # Run application
 if __name__ == '__main__':

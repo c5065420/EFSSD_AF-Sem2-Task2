@@ -19,26 +19,30 @@
             <div class="card h-100 trip-card">
                 <div class="card-body">
 
-                    <h5 class="card-title">{{ trip['match_title'] }}</h5>
-                    <p class="card-text mb-1">📅 {{ trip['match_date'] }} · {{ trip['kickoff_time'] }} KO</p>
-                    <p class="card-text mb-1 small text-muted">📍 {{ trip['departure_point'] }}</p>
+					<h5 class="card-title">
+						<a href="{{ url_for('trip', id=trip['id']) }}" class="text-decoration-none">{{ trip['match_title'] }}</a>
+					</h5>
+					<p class="card-text mb-1">📅 {{ trip['match_date'] }} · {{ trip['kickoff_time'] }} KO</p>
+					<p class="card-text mb-1 small text-muted">📍 {{ trip['departure_point'] }}</p>
 
-                    <div class="mb-2">
-                        <span class="match-badge">{{ trip['competition'] }}</span>
-                        {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
-                        {% if remaining == 0 %}
-                            <span class="seats-full ms-2">Fully Booked</span>
-                        {% elif remaining <= 5 %}
-                            <span class="seats-low ms-2">{{ remaining }} left</span>
-                        {% else %}
-                            <span class="seats-good ms-2">{{ remaining }} seats left</span>
-                        {% endif %}
-                    </div>
+					<div class="mb-2">
+						<span class="match-badge">{{ trip['competition'] }}</span>
+						{% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+						{% if remaining == 0 %}
+							<span class="seats-full ms-2">Fully Booked</span>
+						{% elif remaining <= 5 %}
+							<span class="seats-low ms-2">{{ remaining }} left</span>
+						{% else %}
+							<span class="seats-good ms-2">{{ remaining }} seats left</span>
+						{% endif %}
+					</div>
 
-                    <span class="price-display">£{{ "%.2f"|format(trip['price']) }}</span>
-                    <small class="text-muted">/ seat · Organised by {{ trip['user'] | get_username }}</small>
+					<span class="price-display">£{{ "%.2f"|format(trip['price']) }}</span>
+					<small class="text-muted">/ seat · Organised by {{ trip['user'] | get_username }}</small>
+					<br>
+					<a href="{{ url_for('trip', id=trip['id']) }}" class="btn btn-sm btn-outline-secondary mt-2">View Trip</a>
 
-                </div>
+				</div>
             </div>
         </div>
 
