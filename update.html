@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Update Trip</h1>
+    <hr>
+
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <div class="col-12">
+            <div class="form-floating">
+                <input name="match_title" type="text" class="form-control" id="match_title" value="{{ trip['match_title'] }}">
+                <label for="match_title">Match</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-floating">
+                <select name="competition" class="form-select" id="competition">
+                    <option value="" {% if trip['competition'] == "" %}selected{% endif %}>Select Competition</option>
+                    <option value="Premier League" {% if trip['competition'] == "Premier League" %}selected{% endif %}>Premier League</option>
+                    <option value="Championship" {% if trip['competition'] == "Championship" %}selected{% endif %}>Championship</option>
+                    <option value="League One" {% if trip['competition'] == "League One" %}selected{% endif %}>League One</option>
+                    <option value="League Two" {% if trip['competition'] == "League Two" %}selected{% endif %}>League Two</option>
+                    <option value="FA Cup" {% if trip['competition'] == "FA Cup" %}selected{% endif %}>FA Cup</option>
+                    <option value="EFL Cup" {% if trip['competition'] == "EFL Cup" %}selected{% endif %}>EFL Cup</option>
+                    <option value="Champions League" {% if trip['competition'] == "Champions League" %}selected{% endif %}>Champions League</option>
+                    <option value="Other" {% if trip['competition'] == "Other" %}selected{% endif %}>Other</option>
+                </select>
+                <label for="competition">Competition</label>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-floating">
+                <input name="match_date" type="date" class="form-control" id="match_date" value="{{ trip['match_date'] }}">
+                <label for="match_date">Match Date</label>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-floating">
+                <input name="kickoff_time" type="time" class="form-control" id="kickoff_time" value="{{ trip['kickoff_time'] }}">
+                <label for="kickoff_time">Kick-off Time</label>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="form-floating">
+                <input name="departure_point" type="text" class="form-control" id="departure_point" value="{{ trip['departure_point'] }}">
+                <label for="departure_point">Departure Point</label>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-floating">
+                <input name="departure_time" type="time" class="form-control" id="departure_time" value="{{ trip['departure_time'] }}">
+                <label for="departure_time">Departure Time</label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="form-floating">
+                <input name="destination" type="text" class="form-control" id="destination" value="{{ trip['destination'] }}">
+                <label for="destination">Destination</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-floating">
+                <input name="total_seats" type="number" class="form-control" id="total_seats" min="1" max="100" value="{{ trip['total_seats'] }}">
+                <label for="total_seats">Total Seats</label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-floating">
+                <input name="price" type="number" step="0.01" class="form-control" id="price" min="0" value="{{ trip['price'] }}">
+                <label for="price">Price Per Seat (£)</label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label for="poster" class="form-label">Poster/Image (leave empty to keep current)</label>
+            <input name="poster" type="file" accept="image/*" class="form-control" id="poster">
+        </div>
+
+        <div class="col-12">
+            <div class="form-floating">
+                <textarea name="notes" class="form-control" id="notes" style="height: 100px">{{ trip['notes'] }}</textarea>
+                <label for="notes">Notes for Passengers</label>
+            </div>
+        </div>
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-success w-100">Update Trip</button>
+            <a href="{{ url_for('trip', id=trip['id']) }}" class="btn btn-secondary mt-2">Cancel</a>
+        </div>
+
+    </form>
+
+{% endblock %}
