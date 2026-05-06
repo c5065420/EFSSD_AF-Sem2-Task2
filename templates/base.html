@@ -11,6 +11,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+	<div class="navbar-nav">
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="/trips">Browse Trips</a>
+{% if session.get('user_id') %}
+    <a class="nav-link" href="/create">Post a Trip</a>
+    <a class="nav-link" href="/logout">Logout</a>
+{% else %}
+    <a class="nav-link" href="/register">Register</a>
+    <a class="nav-link" href="/login">Login</a>
+{% endif %}
+</div>
 </head>
 
 <body>
@@ -18,7 +29,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-pitch">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">⚽ {{ siteName }}</a>
+            <a class="navbar-brand" href="/">⚽ {{ KickOff }}</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
