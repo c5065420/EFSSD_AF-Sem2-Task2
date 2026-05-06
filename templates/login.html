@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+<!-- Page Content -->
+{% block content %}
+
+    <h1>Log In</h1>
+    <hr>
+
+    <!-- Login Form -->
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <div class="d-grid col-8 mx-auto">
+            <div class="form-floating mb-3">
+                <input name="username" type="text" class="form-control" id="username" placeholder="username" value="{{ request.form['username'] }}">
+                <label for="username">Username</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+                <label for="password">Password</label>
+            </div>
+
+            <button type="submit" class="btn btn-success">Login</button>
+        </div>
+    </form>
+
+    <div class="text-center mt-4">
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+
+        <div class="alert alert-info mt-3">
+            <h6>Demo Logins (for testing)</h6>
+            <p class="mb-1"><strong>Fan:</strong> jamie / FanPass2025!</p>
+            <p class="mb-0"><strong>Admin:</strong> admin / AdminPass2025!</p>
+        </div>
+    </div>
+
+{% endblock %}

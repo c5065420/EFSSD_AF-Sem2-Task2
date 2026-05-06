@@ -2,9 +2,13 @@
 
 {% block content %}
 
-    <h1>Welcome to KickOff Connect</h1>
+    <h1>Hello, {{ username }}</h1>
     <hr>
-    <p>Fan transport coordination for football match days.</p>
-    <p class="text-muted"><em>Phase 1: Project skeleton — features coming soon.</em></p>
+    <p>Welcome to <strong>KickOff Connect</strong> — fan transport coordination for football match days.</p>
+    <p class="text-muted"><em>Phase 3: Authentication complete. Trip features coming soon.</em></p>
+
+    {% if not session.get('user_id') %}
+        <p>To get started, <a href="{{ url_for('register') }}">register an account</a> or <a href="{{ url_for('login') }}">log in</a>.</p>
+    {% endif %}
 
 {% endblock %}
