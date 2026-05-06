@@ -208,9 +208,81 @@ def delete(id):
     flash(category='success', message='Trip deleted successfully!')
     return redirect(url_for('trips'))
 
+# Book Seats On A Trip
+@app.route('/book/<int:id>', methods=('POST',))
+def book(id):
+    user_id = session.get('user_id')
+    # Ensure user is logged in to book
+    if user_id is None:
+        flash(category='warning', message='You must be logged in to book seats.')
+        return redirect(url_for('login'))
+
+    # Get the trip
+    trip = get_trip_by_id(id)
+    if trip is None:
+        flash(category='warning', message='Trip not found!')
+        return redirect(url_for('trips'))
+
+    # Get the number of seats requested
+    seats = int(request.form['seats']) if request.form.get('seats') else 0
+
+    # Validate the input
+    if seats < 1:
+        flash(category='danger', message='You must book at least 1 seat!')
+        return redirect(url_for('trip', id=id))
+
+    # Check there are enough seats remaining
+    seats_booked = get_seats_booked_for_trip(id)
+    seats_remaining = trip['total_seats'] - seats_booked
+    if seats > seats_remaining:
+        flash(category='danger', message=f'Sorry, only {seats_remaining} seats remaining!')
+        return redirect(url_for('trip', id=id))
+
+    # Create the booking
+    create_booking(user_id, id, seats)
+
+    # Flash a success message
+    flash(category='success', message=f'Booking confirmed! {seats} seat(s) booked.')
+    return redirect(url_for('myBookings'))
+
+
+# My Bookings Page
+@app.route('/bookings/')
+def myBookings():
+    user_id = session.get('user_id')
+    # Ensure user is logged in
+    if user_id is None:
+        flash(category='warning', message='You must be logged in to view your bookings.')
+        return redirect(url_for('login'))
+
+    # Get bookings for this user
+    booking_list = get_bookings_by_user(user_id)
+    return render_template('bookings.html', title="My Bookings", bookings=booking_list)
+
+
+# Cancel A Booking
+@app.route('/cancel/<int:id>', methods=('POST',))
+def cancel(id):
+    user_id = session.get('user_id')
+    # Ensure user is logged in
+    if user_id is None:
+        flash(category='warning', message='You must be logged in to cancel a booking.')
+        return redirect(url_for('login'))
+
+    # Get the booking and check ownership
+    booking = get_booking_by_id(id)
+    if booking is None or booking['user_id'] != user_id:
+        flash(category='danger', message='Booking not found or permission denied.')
+        return redirect(url_for('myBookings'))
+
+    # Delete the booking
+    delete_booking(id)
+    flash(category='success', message='Booking cancelled.')
+    return redirect(url_for('myBookings'))
 
 # Run application
 if __name__ == '__main__':
     print("Starting KickOff Connect...")
     print("Open Your Application in Your Browser: http://localhost:81")
     app.run(host='0.0.0.0', port=81, debug=True)
+    
