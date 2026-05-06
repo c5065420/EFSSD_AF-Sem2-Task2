@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <!-- Edit button for the trip organiser -->
+    <!-- Edit/Delete buttons for the trip organiser -->
     {% if session.get('user_id') == trip['user'] %}
         <div class="float-end">
             <a href="{{ url_for('update', id=trip['id']) }}" class="btn btn-primary mb-3">Edit</a>
@@ -19,17 +19,8 @@
 
     <div class="row">
 
-        <div class="col-md-4 mb-3 text-center">
-            {% if trip['poster'] %}
-                <img src="{{ trip['poster'] }}" alt="Poster for {{ trip['match_title'] }}" class="img-fluid">
-            {% else %}
-                <div class="bg-secondary-subtle p-5 rounded">
-                    <span style="font-size: 5rem;">⚽</span>
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="col-md-8">
+        <!-- Left column: trip details -->
+        <div class="col-md-7">
 
             <h4>Competition</h4>
             <p><span class="match-badge">{{ trip['competition'] }}</span></p>
@@ -40,9 +31,6 @@
 
             <h4>Destination</h4>
             <p>➡️ {{ trip['destination'] }}</p>
-
-            <h4>Price</h4>
-            <p class="price-display">£{{ "%.2f"|format(trip['price']) }} <small class="text-muted fs-6">/ seat</small></p>
 
             <h4>Seats</h4>
             {% set remaining = trip['total_seats'] - seats_booked %}
@@ -63,6 +51,44 @@
             <p>👤 {{ trip['user'] | get_username }}</p>
 
         </div>
+
+        <!-- Right column: booking card -->
+        <div class="col-md-5">
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    🎟️ Book Your Seats
+                </div>
+                <div class="card-body text-center">
+
+                    <p class="price-display">£{{ "%.2f"|format(trip['price']) }}</p>
+                    <p class="text-muted small">per seat</p>
+
+                    {% if remaining == 0 %}
+                        <div class="alert alert-danger">
+                            <strong>Fully Booked</strong><br>
+                            <small>This trip has no seats left.</small>
+                        </div>
+                    {% elif session.get('user_id') %}
+                        <form method="post" action="{{ url_for('book', id=trip['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <div class="form-floating mb-2">
+                                <input type="number" name="seats" id="seats" class="form-control" value="1" min="1" max="{{ remaining }}" required>
+                                <label for="seats">Number of seats</label>
+                            </div>
+                            <p class="small text-muted mb-2">{{ remaining }} available</p>
+                            <button type="submit" class="btn btn-success w-100">Book Now</button>
+                        </form>
+                    {% else %}
+                        <p>You must be logged in to book.</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Log In to Book</a>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
     <div class="text-center mt-4">

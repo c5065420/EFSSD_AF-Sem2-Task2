@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>My Bookings</h1>
+    <hr>
+    <p>All seats you have booked across upcoming trips.</p>
+
+    {% if bookings %}
+        <div class="list-group">
+            {% for booking in bookings %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            <a href="{{ url_for('trip', id=booking['trip_id']) }}" class="text-decoration-none">
+                                {{ booking['match_title'] }}
+                            </a>
+                        </h5>
+                        <small>📅 {{ booking['match_date'] }} · {{ booking['kickoff_time'] }} KO</small>
+                    </div>
+                    <p class="mb-1">📍 {{ booking['departure_point'] }} → {{ booking['destination'] }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small>
+                            <span class="match-badge">{{ booking['competition'] }}</span>
+                            &nbsp;Organised by {{ booking['organiser'] | get_username }}
+                            &nbsp;·&nbsp; <strong>{{ booking['seats'] }} seat(s)</strong>
+                            &nbsp;·&nbsp; Total: <strong>£{{ "%.2f"|format(booking['seats'] * booking['price']) }}</strong>
+                        </small>
+                        <form method="post" action="{{ url_for('cancel', id=booking['id']) }}" onsubmit="return confirm('Cancel this booking?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center mt-5">
+            <p class="text-muted">You haven't booked any trips yet.</p>
+            <a href="{{ url_for('trips') }}" class="btn btn-success">Browse Trips</a>
+        </div>
+    {% endif %}
+
+{% endblock %}
