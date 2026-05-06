@@ -12,3 +12,46 @@ footer {
     color: #6c757d;
     font-size: 0.9rem;
 }
+/* Trip Card */
+.trip-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.trip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Seats remaining indicators */
+.seats-good {
+    color: #198754;
+    font-weight: bold;
+}
+
+.seats-low {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+.seats-full {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Match badge */
+.match-badge {
+    background-color: #0d3b1f;
+    color: white;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Price display */
+.price-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0d3b1f;
+}

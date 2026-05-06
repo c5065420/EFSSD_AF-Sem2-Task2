@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+<!-- Page Content -->
+{% block content %}
+
+    <!-- Button to post a trip -->
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('create') }}" class="btn btn-primary mb-3 float-end">+ Post a Trip</a>
+    {% endif %}
+
+    <h1>{{ title }}</h1>
+    <hr>
+
+    <!-- Row for Trips Grid -->
+    <div class="row g-3">
+    {% for trip in trips %}
+
+        <div class="col-sm-6">
+            <div class="card h-100 trip-card">
+                <div class="card-body">
+
+                    <h5 class="card-title">{{ trip['match_title'] }}</h5>
+                    <p class="card-text mb-1">📅 {{ trip['match_date'] }} · {{ trip['kickoff_time'] }} KO</p>
+                    <p class="card-text mb-1 small text-muted">📍 {{ trip['departure_point'] }}</p>
+
+                    <div class="mb-2">
+                        <span class="match-badge">{{ trip['competition'] }}</span>
+                        {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+                        {% if remaining == 0 %}
+                            <span class="seats-full ms-2">Fully Booked</span>
+                        {% elif remaining <= 5 %}
+                            <span class="seats-low ms-2">{{ remaining }} left</span>
+                        {% else %}
+                            <span class="seats-good ms-2">{{ remaining }} seats left</span>
+                        {% endif %}
+                    </div>
+
+                    <span class="price-display">£{{ "%.2f"|format(trip['price']) }}</span>
+                    <small class="text-muted">/ seat · Organised by {{ trip['user'] | get_username }}</small>
+
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <p class="text-muted">No trips have been posted yet. <a href="{{ url_for('create') }}">Be the first to post one!</a></p>
+    {% endfor %}
+    </div>
+
+{% endblock %}
