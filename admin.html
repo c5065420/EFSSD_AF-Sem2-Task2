@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>🛡️ Admin Panel</h1>
+    <hr>
+    <p>Platform-wide management — users, trips and bookings.</p>
+
+    <!-- Quick stats -->
+    <div class="row g-2 mb-4">
+        <div class="col-4">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <h3 class="mb-0">{{ users|length }}</h3>
+                    <small class="text-muted">Users</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <h3 class="mb-0">{{ trips|length }}</h3>
+                    <small class="text-muted">Trips</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <h3 class="mb-0">{{ bookings|length }}</h3>
+                    <small class="text-muted">Bookings</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Users Table -->
+    <h4>All Users</h4>
+    <div class="table-responsive mb-4">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user['id'] }}</td>
+                        <td><strong>{{ user['username'] }}</strong></td>
+                        <td>
+                            {% if user['is_admin'] %}
+                                <span class="badge bg-warning text-dark">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ user['created'] }}</small></td>
+                        <td>
+                            {% if user['id'] != session.get('user_id') %}
+                                <form method="post" action="{{ url_for('admin_delete_user', id=user['id']) }}" onsubmit="return confirm('Delete this user and all their data? This cannot be undone.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            {% else %}
+                                <small class="text-muted">(you)</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- All Trips Table -->
+    <h4>All Trips</h4>
+    <div class="table-responsive mb-4">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Match</th>
+                    <th>Organiser</th>
+                    <th>Date</th>
+                    <th>Seats</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip in trips %}
+                    {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+                    <tr>
+                        <td>{{ trip['id'] }}</td>
+                        <td>
+                            <a href="{{ url_for('trip', id=trip['id']) }}">{{ trip['match_title'] }}</a>
+                            <br><small class="text-muted">{{ trip['competition'] }}</small>
+                        </td>
+                        <td><small>{{ trip['user'] | get_username }}</small></td>
+                        <td><small>{{ trip['match_date'] }}</small></td>
+                        <td>
+                            <small>
+                                {{ trip['total_seats'] - remaining }}/{{ trip['total_seats'] }}
+                                {% if remaining == 0 %}
+                                    <span class="seats-full">FULL</span>
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <form method="post" action="{{ url_for('delete', id=trip['id']) }}" onsubmit="return confirm('Delete this trip and all its bookings?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- All Bookings Table -->
+    <h4>Recent Bookings</h4>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Trip</th>
+                    <th>Seats</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking['id'] }}</td>
+                        <td><small>{{ booking['username'] }}</small></td>
+                        <td><small>{{ booking['match_title'] }}</small></td>
+                        <td>{{ booking['seats'] }}</td>
+                        <td><small>{{ booking['created'] }}</small></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
