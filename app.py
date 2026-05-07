@@ -279,7 +279,19 @@ def cancel(id):
     delete_booking(id)
     flash(category='success', message='Booking cancelled.')
     return redirect(url_for('myBookings'))
+    
+# My Trips Page (trips this user has organised)
+@app.route('/mytrips/')
+def myTrips():
+    user_id = session.get('user_id')
+    # Ensure user is logged in
+    if user_id is None:
+        flash(category='warning', message='You must be logged in to view your trips.')
+        return redirect(url_for('login'))
 
+    # Get trips organised by this user
+    trip_list = get_trips_by_user(user_id)
+    return render_template('mytrips.html', title="My Trips", trips=trip_list)
 # Run application
 if __name__ == '__main__':
     print("Starting KickOff Connect...")
