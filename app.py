@@ -426,19 +426,67 @@ def cancel(id):
     delete_booking(id)
     flash(category='success', message='Booking cancelled.')
     return redirect(url_for('myBookings'))
-    
-# My Trips Page (trips this user has organised)
-@app.route('/mytrips/')
-def myTrips():
-    user_id = session.get('user_id')
-    # Ensure user is logged in
-    if user_id is None:
-        flash(category='warning', message='You must be logged in to view your trips.')
-        return redirect(url_for('login'))
 
-    # Get trips organised by this user
-    trip_list = get_trips_by_user(user_id)
-    return render_template('mytrips.html', title="My Trips", trips=trip_list)
+
+# Admin Panel
+@app.route('/admin/')
+def admin():
+    # Ensure user is logged in AND is an admin
+    if not session.get('is_admin'):
+        flash(category='danger', message='You do not have permission to access this page.')
+        return redirect(url_for('index'))
+
+    # Get all users, trips and bookings for the admin panel
+    users = get_all_users()
+    all_trips = get_all_trips()
+    all_bookings = get_all_bookings()
+    return render_template('admin.html', title="Admin Panel",
+                           users=users, trips=all_trips, bookings=all_bookings)
+
+
+# Admin Delete User
+@app.route('/admin/delete_user/<int:id>', methods=('POST',))
+def admin_delete_user(id):
+    # Only admins can delete users
+    if not session.get('is_admin'):
+        flash(category='danger', message='Permission denied.')
+        return redirect(url_for('index'))
+
+    # Don't allow admin to delete themselves
+    if id == session.get('user_id'):
+        flash(category='warning', message='You cannot delete your own admin account!')
+        return redirect(url_for('admin'))
+
+    delete_user(id)
+    flash(category='success', message='User deleted.')
+    return redirect(url_for('admin'))
+
+
+# Logout
+@app.route('/logout/')
+def logout():
+    # Clear the session and redirect to the index page with a flash message
+    session.clear()
+    flash(category='info', message='You have been logged out.')
+    return redirect(url_for('index'))
+
+
+# Template filter: get a username from a user_id
+# eg: {{ trip['user']|get_username }}
+@app.template_filter()
+def get_username(user_id):
+    user = get_user_by_id(user_id)
+    return user['username'] if user else 'Unknown'
+
+
+# Template filter: get seats remaining for a trip
+# eg: {{ trip['id']|seats_remaining(trip['total_seats']) }}
+@app.template_filter()
+def seats_remaining(trip_id, total):
+    booked = get_seats_booked_for_trip(trip_id)
+    return total - booked
+
+
 # Run application
 #=========================================================
 # This code executes when the script is run directly.
