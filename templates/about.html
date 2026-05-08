@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="kc-section">
+  <div class="container" style="max-width:760px;">
+
+    <div class="section-label">Platform</div>
+    <div class="section-title">About Kick-Off Connect</div>
+    <p style="color:var(--fog);margin-bottom:2.5rem;font-size:1.05rem;line-height:1.7;">
+      <strong style="color:var(--chalk);">Kick-Off Connect</strong>  Its our job to get you to kick‑off on time.
+    </p>
+
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6">
+        <div class="info-block">
+          <div class="info-block-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+          <div class="info-block-label">What We Do?</div>
+          <div class="info-block-value" style="font-size:0.9rem;font-weight:400;color:var(--fog);line-height:1.6;margin-top:0.4rem;">
+            Our platform allows you to post a trip, browse upcoming fixtures, book seats in a few clicks, and track bookings and passenger lists in real time.
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="info-block">
+          <div class="info-block-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="info-block-label">Our Mission</div>
+          <div class="info-block-value" style="font-size:0.9rem;font-weight:400;color:var(--fog);line-height:1.6;margin-top:0.4rem;">
+            We treat every trip as a ritual: standing shoulder-to-shoulder, singing until your throat is raw, and turning strangers into family for ninety minutes. Across the UK, we move you toward the next match and the next memory.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card mb-4">
+      <h6>Your safety is our priority</h6>
+      <p style="color:var(--fog);font-size:0.9rem;line-height:1.7;margin:0;">
+        We are <strong style="color:var(--chalk);">committed</strong> to keeping you 
+        <strong style="color:var(--chalk);">safe.</strong> We combine 
+        smart technology with trusted safety partners and continuously build systems that make match-day travel safer and simpler for everyone.
+      </p>
+    </div>
+
+    <div class="form-card">
+      <h6>The Team</h6>
+      <p style="color:var(--fog);font-size:0.9rem;line-height:1.7;margin:0;">
+        The team are rock stars; experts in their fields delivering a state‑of‑the‑art solution.
+         <br/><strong style="color:var(--chalk);">Daps, Tobi A and Tobi O </strong>
+            supported by Sheffield Hallam University.
+      </p>
+    </div>
+
+    <div class="mt-4">
+      <a href="{{ url_for('trips') }}" class="btn-kc btn-kc-lg"><i class="bi bi-bus-front-fill"></i> Browse Trips</a>
+      <a href="{{ url_for('contact') }}" class="btn-kc-outline btn-kc-lg ms-2">Contact Us</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

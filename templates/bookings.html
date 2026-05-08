@@ -1,44 +1,48 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="kc-section">
+  <div class="container">
 
-    <h1>My Bookings</h1>
-    <hr>
-    <p>All seats you have booked across upcoming trips.</p>
+    <div class="section-label">Your Account</div>
+    <div class="section-title">My Bookings</div>
+    <p style="color:var(--fog);margin-bottom:2rem;">All seats you have reserved across active trips.</p>
 
     {% if bookings %}
-        <div class="list-group">
-            {% for booking in bookings %}
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">
-                            <a href="{{ url_for('trip', id=booking['trip_id']) }}" class="text-decoration-none">
-                                {{ booking['match_title'] }}
-                            </a>
-                        </h5>
-                        <small>📅 {{ booking['match_date'] }} · {{ booking['kickoff_time'] }} KO</small>
-                    </div>
-                    <p class="mb-1">📍 {{ booking['departure_point'] }} → {{ booking['destination'] }}</p>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small>
-                            <span class="match-badge">{{ booking['competition'] }}</span>
-                            &nbsp;Organised by {{ booking['organiser'] | get_username }}
-                            &nbsp;·&nbsp; <strong>{{ booking['seats'] }} seat(s)</strong>
-                            &nbsp;·&nbsp; Total: <strong>£{{ "%.2f"|format(booking['seats'] * booking['price']) }}</strong>
-                        </small>
-                        <form method="post" action="{{ url_for('cancel', id=booking['id']) }}" onsubmit="return confirm('Cancel this booking?');">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
+      {% for booking in bookings %}
+        <div class="booking-row">
+          <div>
+            <a href="{{ url_for('trip', id=booking['trip_id']) }}" style="text-decoration:none;">
+              <div class="booking-row-match">{{ booking['match_title'] }}</div>
+            </a>
+            <div class="booking-row-meta">
+              <span><i class="bi bi-calendar3"></i> {{ booking['match_date'] }} &middot; {{ booking['kick-off_time'] }}</span>
+              <span><i class="bi bi-geo-alt"></i> {{ booking['departure_point'] }} &rarr; {{ booking['destination'] }}</span>
+              <span><i class="bi bi-person"></i> {{ booking['organiser'] | get_username }}</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            <span class="seats-chip">{{ booking['seats'] }} seat{{ 's' if booking['seats'] != 1 }} &middot; £{{ "%.0f"|format(booking['seats'] * booking['price']) }}</span>
+            <a href="{{ url_for('trip', id=booking['trip_id']) }}" class="btn-kc-outline" style="font-size:0.8rem;padding:6px 14px;">Details</a>
+            <form method="post" action="{{ url_for('cancel', id=booking['id']) }}"
+                  onsubmit="return confirm('Cancel this booking?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn-kc-danger" style="font-size:0.8rem;padding:6px 14px;">
+                <i class="bi bi-x"></i> Cancel
+              </button>
+            </form>
+          </div>
         </div>
+      {% endfor %}
+
     {% else %}
-        <div class="text-center mt-5">
-            <p class="text-muted">You haven't booked any trips yet.</p>
-            <a href="{{ url_for('trips') }}" class="btn btn-success">Browse Trips</a>
-        </div>
+      <div class="empty-state">
+        <i class="bi bi-ticket-perforated"></i>
+        <p>You haven't booked any trips yet.</p>
+        <a href="{{ url_for('trips') }}" class="btn-kc btn-kc-lg mt-3">Browse Trips</a>
+      </div>
     {% endif %}
 
+  </div>
+</div>
 {% endblock %}

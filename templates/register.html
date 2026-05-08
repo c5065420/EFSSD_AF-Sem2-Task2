@@ -1,38 +1,39 @@
 {% extends "base.html" %}
 
-<!-- Page Content -->
 {% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
 
-<h1>Register An Account</h1>
-<hr>
+    <div class="auth-logo"><span style="color:var(--pitch)">⚽</span> KickOff Connect</div>
+    <div class="auth-sub">Join the community. Organise or book trips.</div>
 
-<!-- Registration Form -->
-<form method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-    <div class="d-grid col-8 mx-auto">
-
-        <div class="form-floating mb-3">
-            <input name="username" type="text" class="form-control" id="username" placeholder="username" value="{{ request.form['username'] }}">
-            <label for="username">Username</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input name="password" type="password" class="form-control" id="password" placeholder="Password">
-            <label for="password">Password</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input name="repassword" type="password" class="form-control" id="repassword" placeholder="Re-enter Password">
-            <label for="repassword">Re-enter Password</label>
-        </div>
-
-        <button type="submit" class="btn btn-success">Register</button>
-
+    <div class="auth-tab-bar">
+      <a href="{{ url_for('login') }}"    class="auth-tab">Login</a>
+      <a href="{{ url_for('register') }}" class="auth-tab active">Register</a>
     </div>
 
-</form>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-<div class="text-center mt-4">
-    <p>Already have an account? <a href="{{ url_for('login') }}">Log in here</a></p>
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input name="username" type="text" class="form-control" placeholder="choose a username"
+               value="{{ request.form.get('username', '') }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input name="password" type="password" class="form-control" placeholder="choose a strong password">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <input name="repassword" type="password" class="form-control" placeholder="repeat your password">
+      </div>
+
+      <button type="submit" class="btn-kc btn-kc-block btn-kc-lg mt-1">
+        <i class="bi bi-person-plus"></i> Create Account
+      </button>
+    </form>
+
+  </div>
 </div>
-
 {% endblock %}

@@ -1,124 +1,114 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="kc-section">
+  <div class="container">
 
-    <a href="{{ url_for('create') }}" class="btn btn-primary mb-3 float-end">+ Post a Trip</a>
-
-    <h1>My Trips</h1>
-    <hr>
-    <p>Trips you have posted as an organiser.</p>
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-label">Organiser Dashboard</div>
+        <div class="section-title">My Trips</div>
+      </div>
+      <a href="{{ url_for('create') }}" class="btn-kc"><i class="bi bi-plus-lg"></i> Post a Trip</a>
+    </div>
 
     {% if trips %}
+      <!-- Stats row -->
+      {% set ns = namespace(total_seats=0, total_booked=0, revenue=0.0) %}
+      {% for trip in trips %}
+        {% set booked = trip['total_seats'] - (trip['id']|seats_remaining(trip['total_seats'])) %}
+        {% set ns.total_seats  = ns.total_seats  + trip['total_seats'] %}
+        {% set ns.total_booked = ns.total_booked + booked %}
+        {% set ns.revenue      = ns.revenue      + (booked * trip['price']) %}
+      {% endfor %}
 
-        <!-- Quick Stats Row -->
-        {% set total_seats = trips | sum(attribute='total_seats') %}
-        {% set total_booked = 0 %}
-        {% set total_revenue = 0 %}
-
-        <div class="row g-2 mb-4">
-            <div class="col-sm-3">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <h3 class="mb-0">{{ trips|length }}</h3>
-                        <small class="text-muted">Active Trips</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <h3 class="mb-0">{{ total_seats }}</h3>
-                        <small class="text-muted">Total Seats</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        {% set booked_count = namespace(value=0) %}
-                        {% for trip in trips %}
-                            {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
-                            {% set booked_count.value = booked_count.value + (trip['total_seats'] - remaining) %}
-                        {% endfor %}
-                        <h3 class="mb-0">{{ booked_count.value }}</h3>
-                        <small class="text-muted">Seats Booked</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        {% set revenue = namespace(value=0) %}
-                        {% for trip in trips %}
-                            {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
-                            {% set revenue.value = revenue.value + ((trip['total_seats'] - remaining) * trip['price']) %}
-                        {% endfor %}
-                        <h3 class="mb-0">£{{ "%.0f"|format(revenue.value) }}</h3>
-                        <small class="text-muted">Revenue Est.</small>
-                    </div>
-                </div>
-            </div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-sm-3">
+          <div class="dash-stat">
+            <div class="dash-stat-number">{{ trips | length }}</div>
+            <div class="dash-stat-label">Active Trips</div>
+            <i class="bi bi-bus-front-fill dash-stat-icon"></i>
+          </div>
         </div>
-
-        <!-- Trip List -->
-        <div class="list-group">
-            {% for trip in trips %}
-                {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
-                {% set booked = trip['total_seats'] - remaining %}
-                {% set pct = ((booked / trip['total_seats']) * 100) | int if trip['total_seats'] > 0 else 0 %}
-
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">
-                            <a href="{{ url_for('trip', id=trip['id']) }}" class="text-decoration-none">
-                                {{ trip['match_title'] }}
-                            </a>
-                        </h5>
-                        <small>📅 {{ trip['match_date'] }} · {{ trip['kickoff_time'] }} KO</small>
-                    </div>
-                    <p class="mb-1 small text-muted">
-                        <span class="match-badge">{{ trip['competition'] }}</span>
-                        &nbsp;📍 {{ trip['departure_point'] }}
-                    </p>
-
-                    <!-- Seat fill bar -->
-                    <div class="mt-2 mb-2">
-                        <small><strong>{{ booked }}</strong> of <strong>{{ trip['total_seats'] }}</strong> seats booked
-                        {% if remaining == 0 %}
-                            <span class="seats-full ms-2">Fully Booked</span>
-                        {% elif remaining <= 5 %}
-                            <span class="seats-low ms-2">{{ remaining }} left</span>
-                        {% else %}
-                            <span class="seats-good ms-2">{{ remaining }} available</span>
-                        {% endif %}
-                        </small>
-                        <div class="progress mt-1" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ pct }}%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Action buttons -->
-                    <div class="d-flex gap-2 mt-2">
-                        <a href="{{ url_for('trip', id=trip['id']) }}" class="btn btn-sm btn-outline-secondary">View</a>
-                        <a href="{{ url_for('update', id=trip['id']) }}" class="btn btn-sm btn-primary">Edit</a>
-                        <form method="post" action="{{ url_for('delete', id=trip['id']) }}" onsubmit="return confirm('Delete this trip? All bookings will be lost.');">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
+        <div class="col-6 col-sm-3">
+          <div class="dash-stat amber">
+            <div class="dash-stat-number">{{ ns.total_seats }}</div>
+            <div class="dash-stat-label">Total Seats</div>
+            <i class="bi bi-people-fill dash-stat-icon"></i>
+          </div>
         </div>
+        <div class="col-6 col-sm-3">
+          <div class="dash-stat">
+            <div class="dash-stat-number">{{ ns.total_booked }}</div>
+            <div class="dash-stat-label">Seats Booked</div>
+            <i class="bi bi-ticket-perforated-fill dash-stat-icon"></i>
+          </div>
+        </div>
+        <div class="col-6 col-sm-3">
+          <div class="dash-stat slate-bar">
+            <div class="dash-stat-number">£{{ "%.0f"|format(ns.revenue) }}</div>
+            <div class="dash-stat-label">Revenue Est.</div>
+            <i class="bi bi-currency-pound dash-stat-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trip list -->
+      {% for trip in trips %}
+        {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+        {% set booked = trip['total_seats'] - remaining %}
+        {% set pct = ((booked / trip['total_seats']) * 100) | int if trip['total_seats'] > 0 else 0 %}
+
+        <div class="booking-row" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">
+          <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+            <div>
+              <a href="{{ url_for('trip', id=trip['id']) }}" style="text-decoration:none;">
+                <div class="booking-row-match">{{ trip['match_title'] }}</div>
+              </a>
+              <div class="booking-row-meta">
+                <span><i class="bi bi-calendar3"></i> {{ trip['match_date'] }} &middot; {{ trip['kick-off_time'] }}</span>
+                <span><i class="bi bi-people"></i> {{ booked }} / {{ trip['total_seats'] }} booked</span>
+                <span><span class="match-badge">{{ trip['competition'] }}</span></span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              {% if remaining == 0 %}
+                <span class="status-chip full">Full</span>
+              {% elif remaining <= 5 %}
+                <span class="status-chip partial">Filling Up</span>
+              {% else %}
+                <span class="status-chip active">Active</span>
+              {% endif %}
+              <a href="{{ url_for('update', id=trip['id']) }}" class="btn-kc-outline" style="font-size:0.8rem;padding:5px 12px;">
+                <i class="bi bi-pencil"></i> Edit
+              </a>
+              <form method="post" action="{{ url_for('delete', id=trip['id']) }}"
+                    onsubmit="return confirm('Delete this trip? All bookings will be cancelled.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn-kc-danger" style="font-size:0.8rem;padding:5px 12px;">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          <div style="width:100%;">
+            <div class="seats-bar">
+              <div class="seats-bar-fill {% if remaining == 0 %}danger{% elif remaining <= 5 %}warn{% endif %}"
+                   style="width:{{ pct }}%;"></div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--fog);margin-top:4px;">{{ remaining }} seat{{ 's' if remaining != 1 }} remaining</div>
+          </div>
+        </div>
+      {% endfor %}
 
     {% else %}
-
-        <!-- Empty state -->
-        <div class="text-center mt-5">
-            <p class="text-muted mb-3">You haven't posted any trips yet.</p>
-            <p class="small text-muted mb-4">Once you post a trip, you'll see all your bookings, seat fill rates, and revenue right here.</p>
-            <a href="{{ url_for('create') }}" class="btn btn-success btn-lg">Post Your First Trip</a>
-        </div>
-
+      <div class="empty-state">
+        <i class="bi bi-bus-front"></i>
+        <p>You haven't posted any trips yet.</p>
+        <a href="{{ url_for('create') }}" class="btn-kc btn-kc-lg mt-3">Post Your First Trip</a>
+      </div>
     {% endif %}
 
+  </div>
+</div>
 {% endblock %}

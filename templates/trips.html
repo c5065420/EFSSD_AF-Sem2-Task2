@@ -1,54 +1,134 @@
 {% extends "base.html" %}
 
-<!-- Page Content -->
 {% block content %}
 
-    <!-- Button to post a trip -->
-    {% if session.get('user_id') %}
-        <a href="{{ url_for('create') }}" class="btn btn-primary mb-3 float-end">+ Post a Trip</a>
-    {% endif %}
+<div class="kc-section">
+  <div class="container">
 
-    <h1>{{ title }}</h1>
-    <hr>
-
-    <!-- Row for Trips Grid -->
-    <div class="row g-3">
-    {% for trip in trips %}
-
-        <div class="col-sm-6">
-            <div class="card h-100 trip-card">
-                <div class="card-body">
-
-					<h5 class="card-title">
-						<a href="{{ url_for('trip', id=trip['id']) }}" class="text-decoration-none">{{ trip['match_title'] }}</a>
-					</h5>
-					<p class="card-text mb-1">📅 {{ trip['match_date'] }} · {{ trip['kickoff_time'] }} KO</p>
-					<p class="card-text mb-1 small text-muted">📍 {{ trip['departure_point'] }}</p>
-
-					<div class="mb-2">
-						<span class="match-badge">{{ trip['competition'] }}</span>
-						{% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
-						{% if remaining == 0 %}
-							<span class="seats-full ms-2">Fully Booked</span>
-						{% elif remaining <= 5 %}
-							<span class="seats-low ms-2">{{ remaining }} left</span>
-						{% else %}
-							<span class="seats-good ms-2">{{ remaining }} seats left</span>
-						{% endif %}
-					</div>
-
-					<span class="price-display">£{{ "%.2f"|format(trip['price']) }}</span>
-					<small class="text-muted">/ seat · Organised by {{ trip['user'] | get_username }}</small>
-					<br>
-					<a href="{{ url_for('trip', id=trip['id']) }}" class="btn btn-sm btn-outline-secondary mt-2">View Trip</a>
-
-				</div>
-            </div>
-        </div>
-
-    {% else %}
-        <p class="text-muted">No trips have been posted yet. <a href="{{ url_for('create') }}">Be the first to post one!</a></p>
-    {% endfor %}
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-label">Fan Transport</div>
+        <div class="section-title">Browse Trips</div>
+      </div>
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('create') }}" class="btn-kc"><i class="bi bi-plus-lg"></i> Post a Trip</a>
+      {% endif %}
     </div>
 
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <input type="text" id="tripSearch" placeholder="Search team or city…">
+      <select id="compFilter">
+        <option value="">All Competitions</option>
+        <option>Premier League</option>
+        <option>Championship</option>
+        <option>League One</option>
+        <option>League Two</option>
+        <option>FA Cup</option>
+        <option>EFL Cup</option>
+        <option>EFL Trophy</option>
+        <option>Champions League</option>
+        <option>Europa League</option>
+        <option>Other</option>
+      </select>
+      <button class="btn-kc" onclick="filterTrips()"><i class="bi bi-search"></i> Filter</button>
+    </div>
+
+    <!-- Trip Cards Grid -->
+    {% if trips %}
+      <div class="row g-3" id="tripGrid">
+        {% for trip in trips %}
+          {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+          <div class="col-md-6 col-xl-4 trip-card-col"
+               data-title="{{ trip['match_title'] | lower }}"
+               data-departure="{{ trip['departure_point'] | lower }}"
+               data-dest="{{ trip['destination'] | lower }}"
+               data-comp="{{ trip['competition'] }}">
+            <a href="{{ url_for('trip', id=trip['id']) }}" class="trip-card">
+              <div class="trip-card-header">
+                <div class="match-badge">{{ trip['competition'] }}</div>
+                <div class="match-title">{{ trip['match_title'] }}</div>
+                <div class="match-date"><i class="bi bi-calendar3"></i> {{ trip['match_date'] }} &middot; {{ trip['kick-off_time'] }} KO</div>
+                <div class="seats-indicator">
+                  {% if remaining == 0 %}
+                    <div class="seats-number full">0</div>
+                    <div class="seats-label">fully booked</div>
+                  {% elif remaining <= 5 %}
+                    <div class="seats-number low">{{ remaining }}</div>
+                    <div class="seats-label">seats left</div>
+                  {% else %}
+                    <div class="seats-number">{{ remaining }}</div>
+                    <div class="seats-label">seats left</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="trip-card-body">
+                <div class="trip-meta-row"><i class="bi bi-geo-alt"></i> Departs {{ trip['departure_point'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-clock"></i> Coach leaves {{ trip['departure_time'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-arrow-right-circle"></i> {{ trip['destination'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-person"></i> Organised by <strong style="color:var(--chalk);">{{ trip['user'] | get_username }}</strong></div>
+              </div>
+              <div class="trip-card-footer">
+                <div class="price-tag">£{{ "%.0f"|format(trip['price']) }} <span>/ seat</span></div>
+                {% if remaining == 0 %}
+                  <span class="btn-kc-outline" style="opacity:0.5;cursor:not-allowed;">Fully Booked</span>
+                {% else %}
+                  <span class="btn-kc">View Trip <i class="bi bi-arrow-right"></i></span>
+                {% endif %}
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="empty-state" id="noResults" style="display:none;">
+        <i class="bi bi-search"></i>
+        <p>No trips match your search.</p>
+      </div>
+
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-bus-front"></i>
+        <p>No trips have been posted yet.</p>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('create') }}" class="btn-kc btn-kc-lg mt-3">Post the First Trip</a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn-kc btn-kc-lg mt-3">Join &amp; Post a Trip</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const searchInput = document.getElementById('tripSearch');
+  const compFilter  = document.getElementById('compFilter');
+  const cards       = document.querySelectorAll('.trip-card-col');
+  const noResults   = document.getElementById('noResults');
+
+  function filterTrips() {
+    const search = (searchInput ? searchInput.value : '').toLowerCase();
+    const comp   = compFilter ? compFilter.value : '';
+    let visible  = 0;
+    cards.forEach(col => {
+      const title     = (col.dataset.title     || '');
+      const departure = (col.dataset.departure || '');
+      const dest      = (col.dataset.dest      || '');
+      const cardComp  = (col.dataset.comp      || '');
+      const matchesSearch = !search || title.includes(search) || departure.includes(search) || dest.includes(search);
+      const matchesComp   = !comp   || cardComp === comp;
+      const show = matchesSearch && matchesComp;
+      col.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  if (searchInput) searchInput.addEventListener('input', filterTrips);
+  if (compFilter)  compFilter.addEventListener('change', filterTrips);
+</script>
 {% endblock %}
