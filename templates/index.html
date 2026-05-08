@@ -2,13 +2,113 @@
 
 {% block content %}
 
-    <h1>Hello, {{ username }}</h1>
-    <hr>
-    <p>Welcome to <strong>KickOff Connect</strong> — fan transport coordination for football match days.</p>
-    <p class="text-muted"><em>Phase 3: Authentication complete. Trip features coming soon.</em></p>
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-tag"><i class="bi bi-geo-alt-fill"></i> Live Trip Board</div>
+    <h1>Match Day.<br><span>Your Ride.</span><br>Sorted.</h1>
+    <p>Find and book fan transport to any fixture — away days, local derbies, cup finals. One platform, zero chaos.</p>
+    <div>
+      <div class="stat-pill"><i class="bi bi-bus-front-fill"></i> <strong>{{ trip_count }}</strong> active trips</div>
+      <div class="stat-pill"><i class="bi bi-ticket-perforated-fill"></i> <strong>{{ booking_count }}</strong> bookings made</div>
+      <div class="stat-pill"><i class="bi bi-calendar3"></i> <strong>{{ trips | length }}</strong> upcoming fixtures</div>
+    </div>
+  </div>
+</div>
 
-    {% if not session.get('user_id') %}
-        <p>To get started, <a href="{{ url_for('register') }}">register an account</a> or <a href="{{ url_for('login') }}">log in</a>.</p>
+<!-- ── FEATURED TRIPS ── -->
+<div class="kc-section">
+  <div class="container">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <div>
+        <div class="section-label">Upcoming</div>
+        <div class="section-title">Next Fixtures</div>
+      </div>
+      <a href="{{ url_for('trips') }}" class="btn-kc-outline">Browse All <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    {% if trips %}
+      <div class="row g-3">
+        {% for trip in trips %}
+          {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+          <div class="col-md-6 col-xl-4">
+            <a href="{{ url_for('trip', id=trip['id']) }}" class="trip-card">
+              <div class="trip-card-header">
+                <div class="match-badge">{{ trip['competition'] }}</div>
+                <div class="match-title">{{ trip['match_title'] }}</div>
+                <div class="match-date"><i class="bi bi-calendar3"></i> {{ trip['match_date'] }} &middot; {{ trip['kick-off_time'] }} KO</div>
+                <div class="seats-indicator">
+                  {% if remaining == 0 %}
+                    <div class="seats-number full">0</div>
+                    <div class="seats-label">fully booked</div>
+                  {% elif remaining <= 5 %}
+                    <div class="seats-number low">{{ remaining }}</div>
+                    <div class="seats-label">seats left</div>
+                  {% else %}
+                    <div class="seats-number">{{ remaining }}</div>
+                    <div class="seats-label">seats left</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="trip-card-body">
+                <div class="trip-meta-row"><i class="bi bi-geo-alt"></i> Departs {{ trip['departure_point'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-clock"></i> Coach leaves {{ trip['departure_time'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-arrow-right-circle"></i> {{ trip['destination'] }}</div>
+                <div class="trip-meta-row"><i class="bi bi-person"></i> Organised by <strong style="color:var(--chalk);">{{ trip['user'] | get_username }}</strong></div>
+              </div>
+              <div class="trip-card-footer">
+                <div class="price-tag">£{{ "%.0f"|format(trip['price']) }} <span>/ seat</span></div>
+                <span class="btn-kc">View Trip <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{{ url_for('trips') }}" class="btn-kc btn-kc-lg">View All Trips <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-bus-front"></i>
+        <p>No trips yet. Be the first to organise one!</p>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('create') }}" class="btn-kc btn-kc-lg mt-3">Post a Trip</a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn-kc btn-kc-lg mt-3">Join &amp; Post a Trip</a>
+        {% endif %}
+      </div>
     {% endif %}
+
+  </div>
+</div>
+
+<!-- ── LIVE FIXTURES ── -->
+{% if fixtures %}
+<div class="kc-section" style="padding-top:0;">
+  <div class="container">
+    <div class="section-label">FIFA World Cup 2026</div>
+    <div class="section-title" style="margin-bottom:1.25rem;">Upcoming Fixtures</div>
+    <div class="row g-3">
+      {% for f in fixtures[:5] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="info-block" style="gap:0.5rem;">
+          <div style="font-weight:600;color:var(--chalk);font-size:0.95rem;">{{ f['strHomeTeam'] }} vs {{ f['strAwayTeam'] }}</div>
+          <div style="font-size:0.82rem;color:var(--fog);">
+            <i class="bi bi-calendar3"></i> {{ f['dateEvent'] }}
+            {% if f['strTime'] %}&middot; {{ f['strTime'][:5] }} KO{% endif %}
+          </div>
+          {% if f['strVenue'] %}
+          <div style="font-size:0.78rem;color:var(--fog);"><i class="bi bi-geo-alt"></i> {{ f['strVenue'] }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}

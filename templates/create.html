@@ -1,99 +1,91 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="kc-section">
+  <div class="container" style="max-width:740px;">
 
-    <h1>Post a Trip</h1>
-    <hr>
+    <div class="section-label">Organiser</div>
+    <div class="section-title">Post a Trip</div>
+    <p style="color:var(--fog);margin-bottom:2rem;">Fill in the details below to list your transport for other fans to book.</p>
 
-    <!-- Add Trip Form -->
-    <form method="post" enctype="multipart/form-data" class="row g-3">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-        <div class="col-12">
-            <div class="form-floating">
-                <input name="match_title" type="text" class="form-control" id="match_title" placeholder="e.g. Sheffield Utd vs Arsenal">
-                <label for="match_title">Match (e.g. Home vs Away)</label>
-            </div>
+      <div class="form-card mb-3">
+        <h6>Match Information</h6>
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Match Title</label>
+            <input name="match_title" type="text" class="form-control" placeholder="e.g. Sheffield Utd vs Arsenal">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Competition</label>
+            <select name="competition" class="form-select">
+              <option value="">Select Competition</option>
+              <option>Premier League</option>
+              <option>Championship</option>
+              <option>League One</option>
+              <option>League Two</option>
+              <option>FA Cup</option>
+              <option>EFL Cup</option>
+              <option>EFL Trophy</option>
+              <option>Champions League</option>
+              <option>Europa League</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <label class="form-label">Match Date</label>
+            <input name="match_date" type="date" class="form-control">
+          </div>
+          <div class="col-sm-3">
+            <label class="form-label">Kick-off Time</label>
+            <input name="kick-off_time" type="time" class="form-control" value="15:00">
+          </div>
         </div>
+      </div>
 
-        <div class="col-lg-6">
-            <div class="form-floating">
-                <select name="competition" class="form-select" id="competition">
-                    <option value="">Select Competition</option>
-                    <option value="Premier League">Premier League</option>
-                    <option value="Championship">Championship</option>
-                    <option value="League One">League One</option>
-                    <option value="League Two">League Two</option>
-                    <option value="FA Cup">FA Cup</option>
-                    <option value="EFL Cup">EFL Cup</option>
-                    <option value="Champions League">Champions League</option>
-                    <option value="Other">Other</option>
-                </select>
-                <label for="competition">Competition</label>
-            </div>
+      <div class="form-card mb-3">
+        <h6>Transport Details</h6>
+        <div class="row g-3">
+          <div class="col-sm-8">
+            <label class="form-label">Departure Point</label>
+            <input name="departure_point" type="text" class="form-control" placeholder="e.g. Pond Street Bus Station, Bay 7">
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label">Departure Time</label>
+            <input name="departure_time" type="time" class="form-control" value="12:30">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Destination (Stadium)</label>
+            <input name="destination" type="text" class="form-control" placeholder="e.g. Bramall Lane, Sheffield">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Total Seats</label>
+            <input name="total_seats" type="number" class="form-control" placeholder="40" min="1" max="100">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Price Per Seat (£)</label>
+            <input name="price" type="number" step="0.01" class="form-control" placeholder="12.00" min="0">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notes for Passengers</label>
+            <textarea name="notes" class="form-control" rows="3"
+              placeholder="Meeting instructions, return time, payment method, contact details…"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Poster / Image (optional)</label>
+            <input name="poster" type="file" accept="image/*">
+          </div>
         </div>
-        <div class="col-lg-3">
-            <div class="form-floating">
-                <input name="match_date" type="date" class="form-control" id="match_date">
-                <label for="match_date">Match Date</label>
-            </div>
-        </div>
-        <div class="col-lg-3">
-            <div class="form-floating">
-                <input name="kickoff_time" type="time" class="form-control" id="kickoff_time" value="15:00">
-                <label for="kickoff_time">Kick-off Time</label>
-            </div>
-        </div>
+      </div>
 
-        <div class="col-lg-9">
-            <div class="form-floating">
-                <input name="departure_point" type="text" class="form-control" id="departure_point" placeholder="e.g. Pond Street Bus Station">
-                <label for="departure_point">Departure Point</label>
-            </div>
-        </div>
-        <div class="col-lg-3">
-            <div class="form-floating">
-                <input name="departure_time" type="time" class="form-control" id="departure_time" value="12:30">
-                <label for="departure_time">Departure Time</label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="form-floating">
-                <input name="destination" type="text" class="form-control" id="destination" placeholder="e.g. Bramall Lane, Sheffield">
-                <label for="destination">Destination (Stadium)</label>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="form-floating">
-                <input name="total_seats" type="number" class="form-control" id="total_seats" placeholder="40" min="1" max="100">
-                <label for="total_seats">Total Seats Available</label>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="form-floating">
-                <input name="price" type="number" step="0.01" class="form-control" id="price" placeholder="12.00" min="0">
-                <label for="price">Price Per Seat (£)</label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <label for="poster" class="form-label">Poster/Image (optional)</label>
-            <input name="poster" type="file" accept="image/*" class="form-control" id="poster">
-        </div>
-
-        <div class="col-12">
-            <div class="form-floating">
-                <textarea name="notes" class="form-control" placeholder="Notes" id="notes" style="height: 100px"></textarea>
-                <label for="notes">Notes for Passengers (meeting instructions, payment, return time)</label>
-            </div>
-        </div>
-
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-success w-100">Post Trip</button>
-        </div>
+      <div class="d-flex gap-3">
+        <button type="submit" class="btn-kc btn-kc-lg"><i class="bi bi-send-fill"></i> Publish Trip</button>
+        <a href="{{ url_for('trips') }}" class="btn-kc-outline btn-kc-lg">Cancel</a>
+      </div>
 
     </form>
-
+  </div>
+</div>
 {% endblock %}

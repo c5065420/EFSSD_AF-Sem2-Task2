@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="kc-section">
+  <div class="container">
+
+    <div class="section-label" style="color:var(--amber);">Superuser</div>
+    <div class="section-title">Admin Panel</div>
+    <p style="color:var(--fog);margin-bottom:2rem;">Platform-wide management — users, trips and bookings.</p>
+
+    <!-- Stats -->
+    {% set ns = namespace(full=0) %}
+    {% for trip in trips %}
+      {% if trip['id']|seats_remaining(trip['total_seats']) == 0 %}
+        {% set ns.full = ns.full + 1 %}
+      {% endif %}
+    {% endfor %}
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-sm-3">
+        <div class="dash-stat">
+          <div class="dash-stat-number">{{ users | length }}</div>
+          <div class="dash-stat-label">Registered Users</div>
+          <i class="bi bi-person-fill dash-stat-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dash-stat amber">
+          <div class="dash-stat-number">{{ trips | length }}</div>
+          <div class="dash-stat-label">Active Trips</div>
+          <i class="bi bi-bus-front-fill dash-stat-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dash-stat">
+          <div class="dash-stat-number">{{ bookings | length }}</div>
+          <div class="dash-stat-label">Total Bookings</div>
+          <i class="bi bi-ticket-perforated-fill dash-stat-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dash-stat red">
+          <div class="dash-stat-number">{{ ns.full }}</div>
+          <div class="dash-stat-label">Full Trips</div>
+          <i class="bi bi-exclamation-triangle-fill dash-stat-icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users table -->
+    <h6 style="font-family:var(--font-display);letter-spacing:0.04em;color:var(--chalk);margin-bottom:1rem;">All Users</h6>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Username</th><th>Role</th><th>Joined</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td>{{ user['id'] }}</td>
+              <td><strong>{{ user['username'] }}</strong></td>
+              <td>
+                {% if user['is_admin'] %}
+                  <span class="status-chip admin">Admin</span>
+                {% else %}
+                  <span class="status-chip user">User</span>
+                {% endif %}
+              </td>
+              <td>{{ user['created'] }}</td>
+              <td>
+                {% if user['id'] != session.get('user_id') %}
+                  <form method="post" action="{{ url_for('admin_delete_user', id=user['id']) }}"
+                        onsubmit="return confirm('Delete this user and all their data?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn-kc-danger" style="font-size:0.75rem;padding:3px 10px;">Delete</button>
+                  </form>
+                {% else %}
+                  <span style="color:var(--fog);font-size:0.8rem;">(you)</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Trips table -->
+    <h6 style="font-family:var(--font-display);letter-spacing:0.04em;color:var(--chalk);margin-bottom:1rem;">All Trips</h6>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Match</th><th>Organiser</th><th>Date</th><th>Seats</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for trip in trips %}
+            {% set remaining = trip['id']|seats_remaining(trip['total_seats']) %}
+            {% set booked = trip['total_seats'] - remaining %}
+            <tr>
+              <td>
+                <a href="{{ url_for('trip', id=trip['id']) }}"><strong>{{ trip['match_title'] }}</strong></a>
+                <br><small>{{ trip['competition'] }}</small>
+              </td>
+              <td>{{ trip['user'] | get_username }}</td>
+              <td>{{ trip['match_date'] }}</td>
+              <td>{{ booked }}/{{ trip['total_seats'] }}</td>
+              <td>
+                {% if remaining == 0 %}
+                  <span class="status-chip full">Full</span>
+                {% elif remaining <= 5 %}
+                  <span class="status-chip partial">Filling</span>
+                {% else %}
+                  <span class="status-chip active">Active</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('delete', id=trip['id']) }}"
+                      onsubmit="return confirm('Delete this trip and all bookings?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="btn-kc-danger" style="font-size:0.75rem;padding:3px 10px;">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bookings table -->
+    <h6 style="font-family:var(--font-display);letter-spacing:0.04em;color:var(--chalk);margin-bottom:1rem;">Recent Bookings</h6>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>User</th><th>Trip</th><th>Seats</th><th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+            <tr>
+              <td>{{ booking['id'] }}</td>
+              <td><strong>{{ booking['username'] }}</strong></td>
+              <td>{{ booking['match_title'] }}</td>
+              <td>{{ booking['seats'] }}</td>
+              <td>{{ booking['created'] }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
