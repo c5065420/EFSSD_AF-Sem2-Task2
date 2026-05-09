@@ -239,11 +239,28 @@ def create():
                 poster = poster_url  # Use the uploaded file URL in database
 
         # Validate the input
+        error = None
         if not match_title:
-            flash(category='danger', message='Match title is required!')
-            return redirect(url_for('create'))
-        if total_seats < 1:
-            flash(category='danger', message='Total seats must be at least 1!')
+            error = 'Match title is required!'
+        elif not competition:
+            error = 'Competition is required!'
+        elif not match_date:
+            error = 'Match date is required!'
+        elif not kickoff_time:
+            error = 'Kick-off time is required!'
+        elif not departure_point:
+            error = 'Departure point is required!'
+        elif not departure_time:
+            error = 'Departure time is required!'
+        elif not destination:
+            error = 'Destination is required!'
+        elif total_seats < 1:
+            error = 'Total seats must be at least 1!'
+        elif not request.form.get('price'):
+            error = 'Price is required!'
+
+        if error:
+            flash(category='danger', message=error)
             return redirect(url_for('create'))
 
         # Use the database function to insert the new trip
